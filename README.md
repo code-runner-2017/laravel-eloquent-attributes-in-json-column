@@ -39,10 +39,29 @@ postgresql:
 - crea `.env.testing` che punta a DB Postgres
 - in `phpunit.xml` commentare `DB_CONNECTION` e `DB_DATABASE`
 
-LIMITAZIONI:
+# Limitazioni
 - non funziona mass update. I campi serializzati possono essere solo gestiti recuperando l'intero
   model dal DB, aggiornandolo e risalvandolo.
 - se si serializza il model, i campi serializzati appaiono sotto l'attributo `metadata`.
   Da codice, invece, possono essere utilizzati direttamente.
 
+# Uso con Filamentphp
 
+MetaModel funziona anche con Filamentphp. Provato con versione 4.0.
+Se si crea una risorsa che utilizza un MetaModel, e' necessario:
+
+- aggiungere tutti gli attributi serializzati all'array `$fillable` sul modello;
+- aggiungere questo metodo alla classe `Edit<Resource>`:
+
+```php
+protected function mutateFormDataBeforeFill(array $data): array
+{
+    if ($data['metadata'] != null) {
+        foreach ($data['metadata'] as $key => $value) {
+            $data[$key] = $value;
+        }
+    }
+
+    return $data;
+}
+```
